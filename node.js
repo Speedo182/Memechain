@@ -2075,7 +2075,78 @@ app.use((err, req, res, next) => {
 
 
 
+{
+// The user is authorized
+// Get the user's balance
+const balance = await contract.methods.balanceOf(user.address).call();
+// Send the balance to the user
+res.send({ balance });
+}
+}
 
+// Create a new route for transferring tokens
+app.post('/transfer', checkAuth, async (req, res) => {
+// Check if the user is authorized
+if (!req.user.roles.includes('transfer')) {
+// The user is not authorized
+res.status(401).send({ message: 'Unauthorized' });
+return;
+}
+// Get the address to send the tokens to
+const to = req.body.to;
+// Get the number of tokens to send
+const value = req.body.value;
+// Get the user's address
+const from = req.user.address;
+// Get the current block number
+const blockNumber = await web3.eth.getBlockNumber();
+// Get the gas price
+const gasPrice = web3.utils.toWei(req.body.gasPrice || '20', 'gwei');
+// Get the nonce
+const nonce = await web3.eth.getTransactionCount(from);
+// Build the transaction
+const transaction = {
+from,
+to,
+value: web3.utils.toWei(value, 'ether'),
+gas: 3000000,
+gasPrice,
+nonce,
+data: contract.methods.transfer(to, value).encodeABI()
+};
+// Sign the transaction
+const signedTransaction = await web3.eth.accounts.signTransaction(transaction, req.user.privateKey);
+// Send the transaction
+try {
+const receipt = await web3.eth.sendSignedTransaction(signedTransaction.rawTransaction);
+// Check if the contract has been updated
+if (receipt.blockNumber > blockNumber) {
+// The contract has been updated
+console.log('Smart contract updated');
+}
+// Send a success response
+res.send({ message: 'Transaction successful' });
+} catch (error) {
+// Send an error response
+res.status(500).send({ message: 'Transaction failed' });
+}
+});
+
+// Use the compression package to compress responses
+app.use(compression());
+
+// Start the server
+startServer();
+}
+
+// Call the main function to start the application
+main();
+}
+
+// Export the module
+module.exports = {
+startServer,
+}
 
 
 
