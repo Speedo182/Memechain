@@ -1,0 +1,109 @@
+/* Global Styles */
+body {
+    font-family: "Open Sans", sans-serif;
+    background-color: #f2f2f2;
+}
+
+/* Header Styles */
+header {
+    background-color: #363636;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Meme Mascot Styles */
+.meme-mascot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+/* Animation Keyframes */
+@keyframes bounce {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(180deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Navigation Styles */
+nav {
+    background-color: #f2f2f2;
+    text-align: center;
+    padding: 20px;
+}
+nav a {
+    color: #363636;
+    text-decoration: none;
+    padding: 10px;
+}
+nav a:hover {
+    color: #363636;
+    background-color: #f2f2f2;
+    border-radius: 10px;
+}
+
+/* Leaderboard Styles */
+.leaderboard {
+    background-color: #f2f2f2;
+    text-align: center;
+    padding: 20px;
+    margin: 20px;
+}
+.leaderboard h2 {
+    color: #363636;
+}
+.leaderboard table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.leaderboard th, td {
+    border: 1px solid #363636;
+    padding: 10px;
+    text-align: left;
+}
+.leaderboard th {
+    background-color: #363636;
+    color: white;
+}
+
+/* Community Forum Styles */
+.community-forum {
+    background-color: #f2f2f2;
+    text-align: center;
+    padding: 20px;
+    margin: 20px;
+}
+.community-forum h2 {
+    color: #363636;
+}
+.community-forum form {
+    width: 80%;
+    margin: 0 auto;
+}
+.community-forum textarea {
+    width: 100%;
+    height: 150px;
+    margin-bottom: 20px;
+}
+.community-forum button {
+    background-color: #363636;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+.community-forum button:hover {
+    background-color: #f2f2f2;
+    color: #363636;
+}
