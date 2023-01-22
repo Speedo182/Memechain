@@ -1,0 +1,78 @@
+pragma solidity ^0.8.0;
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/math/SafeMath.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/cryptography/ECDSA.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/cryptography/PQC.sol";
+
+contract Memechain {
+    using SafeMath for uint256;
+    using PQC for bytes32;
+    using ECDSA for bytes32;
+
+    address public owner;
+    address public proxy;
+    address public implementation;
+    bytes32 public version;
+    mapping(address => bool) public authorized;
+
+    struct Block {
+        bytes32 previous_hash;
+        bytes32 data_hash;
+        bytes32 shard_id;
+        bytes32 public_key;
+        bytes32 signature;
+    }
+
+    mapping(bytes32 => Block) public blocks;
+    bytes32[] public block_hashes;
+
+    event Transfer(address indexed _from, address indexed _to, uint _value);
+    event Error(string message);
+
+    constructor() public {
+        owner = msg.sender;
+    }
+
+    function add_block(string memory data, bytes32 shard_id) public {
+        require(authorized[msg.sender]);
+        bytes32 data_hash = keccak256(abi.encodePacked(data));
+        bytes32 previous_hash = block_hashes[block_hashes.length-1];
+        bytes32 private_key = PQC.generatePrivateKey();
+        bytes32 public_key = ECDSA.generatePublicKey(private_key);
+        bytes32 signature = ECDSA.sign(keccak256(abi.encodePacked(previous_hash, data_hash)), private_key);
+
+        blocks[signature] = Block(previous_hash, data_hash, shard_id, public_key, signature);
+        block_hashes.push(signature);
+    }
+
+    function validate_block(bytes32 hash) public view returns (bool) {
+        require(authorized[msg.sender]);
+        Block storage block = blocks[hash];
+        return ECDSA.verify(keccak256(abi.encodePacked(block.previous_hash, block.data_hash)), block.signature, block.public_key);
+    }
+
+    function authorize(address user) public {
+        require(msg.sender == owner);
+        authorized[user] = true;
+    }
+
+    function revoke(address user) public {
+        require(msg.sender == owner);
+        authorized[user] = false;
+    }
+
+    function set_proxy(address _proxy) public {
+        require(msg.sender == owner);
+        proxy = _proxy;
+    }
+
+    function set_implementation(address _implementation) public {
+        require(msg.sender == owner);
+        implementation = _implementation;
+    }
+
+    function set_version(bytes32 _version) public {
+        require(msg.sender == owner);
+        version = _version;
+    }
+
+}
