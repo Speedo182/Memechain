@@ -1,37 +1,63 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
-import { lightTheme, darkTheme } from './theme';
-import { GlobalStyles } from './global';
-import { Home, Leaderboard, Forum, Profile } from './pages';
-import { Navbar, Footer } from './components';
+import { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from './actions';
+import { getMemes, getUserMemes } from './api';
+import { MemeCard } from './components/MemeCard';
 
-function App() {
-  const [theme, setTheme] = useState('light');
+function Home() {
+  const [memes, setMemes] = useState([]);
+  const [userMemes, setUserMemes] = useState([]);
+  const history = useHistory();
+  const user = useSelector(state => state.user);
+  const dispatch = useDispatch();
 
-  const toggleTheme = () => {
-    if (theme === 'light') {
-      setTheme('dark');
+  useEffect(() => {
+    if (!user) {
+      history.push('/login');
     } else {
-      setTheme('light');
+      getMemes().then(data => setMemes(data));
+      getUserMemes(user.address).then(data => setUserMemes(data));
     }
-  };
+  }, [user, history]);
+
+  function handleLogout() {
+    dispatch(setUser(null));
+    history.push('/login');
+  }
 
   return (
-    <ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
-      <GlobalStyles />
-      <Router>
-        <Navbar toggleTheme={toggleTheme} />
-        <Switch>
-          <Route exact path='/' component={Home} />
-          <Route path='/leaderboard' component={Leaderboard} />
-          <Route path='/forum' component={Forum} />
-          <Route path='/profile' component={Profile} />
-        </Switch>
-        <Footer />
-      </Router>
-    </ThemeProvider>
+    <div className="home-container">
+      <nav>
+        <div className="nav-left">
+          <img src={require('./assets/memechain-logo.png')} alt="Memechain logo" className="logo" />
+          <h1 className="title">Memechain</h1>
+        </div>
+        <div className="nav-right">
+          <p className="greeting">Hi, {user.name}</p>
+          <button className="logout-button" onClick={handleLogout}>Logout</button>
+        </div>
+      </nav>
+      <main>
+        <div className="section-container">
+          <h2 className="section-title">My memes</h2>
+          <div className="meme-container">
+            {userMemes.map(meme => (
+              <MemeCard key={meme.id} meme={meme} />
+            ))}
+          </div>
+        </div>
+        <div className="section-container">
+          <h2 className="section-title">All memes</h2>
+          <div className="meme-container">
+            {memes.map(meme => (
+              <MemeCard key={meme.id} meme={meme} />
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }
 
-export default App;
+export default Home;
