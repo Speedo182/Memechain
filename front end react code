@@ -1,3 +1,9 @@
+import React, { useState } from 'react';
+import { useAuth } from './AuthContext';
+import { useWeb3 } from './Web3Context';
+import { "ENTER INFO HERE, IT'S MISSING"
+
+
 import { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
